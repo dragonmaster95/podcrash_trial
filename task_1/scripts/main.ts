@@ -1,3 +1,2 @@
 import {world} from "@minecraft/server";
-
-world.sendMessage("Hello World");
+world.sendMessage("Load test");

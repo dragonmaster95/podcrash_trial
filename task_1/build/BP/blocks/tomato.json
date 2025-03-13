@@ -1,0 +1,285 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "dm95:tomato",
+      "states": {
+        "dm95:growth": {
+          "values": {
+            "min": 1,
+            "max": 7
+          }
+        },
+        "dm95:top": [
+          false,
+          true
+        ]
+      }
+    },
+    "components": {
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": true,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:loot": "loot_tables/empty.json",
+      "minecraft:liquid_detection": {
+        "detection_rules": [
+          {
+            "liquid_type": "water",
+            "on_liquid_touches": "popped"
+          }
+        ]
+      },
+      "minecraft:geometry": {
+        "identifier": "geometry.crop_2_layer",
+        "bone_visibility": {
+          "layer_0": "!q.block_state('dm95:top')",
+          "layer_1": "q.block_state('dm95:top')"
+        }
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "dm95:tomato_stage_1",
+          "render_method": "alpha_test",
+          "face_dimming": false,
+          "ambient_occlusion": false
+        }
+      },
+      "minecraft:light_dampening": 0,
+      "minecraft:map_color": "#32a852"
+    },
+    "permutations": [
+      {
+        "condition": "!q.block_state('dm95:top')",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "up"
+                ],
+                "block_filter": [
+                  "minecraft:farmland"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:top')",
+        "components": {
+          "minecraft:placement_filter": {
+            "conditions": [
+              {
+                "allowed_faces": [
+                  "up"
+                ],
+                "block_filter": [
+                  {
+                    "name": "dm95:tomato",
+                    "states": {
+                      "dm95:top": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') < 7 && !q.block_state('dm95:top')",
+        "components": {
+          "minecraft:loot": "loot_tables/dm95/block/tomato_immature.json"
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 7 && !q.block_state('dm95:top')",
+        "components": {
+          "minecraft:loot": "loot_tables/dm95/block/tomato_mature.json"
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_1",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_2",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 3",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_3",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 4",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_4",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') >= 5",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_5",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 6",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_6",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 7",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "dm95:tomato_stage_7",
+              "render_method": "alpha_test_single_sided",
+              "ambient_occlusion": false,
+              "face_dimming": false
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') < 2 && !q.block_state('dm95:top')",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              3,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') >= 2 && !q.block_state('dm95:top')",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16.0,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 1 && q.block_state('dm95:top')",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') == 2 && q.block_state('dm95:top')",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              1.0,
+              16
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('dm95:growth') > 2 && q.block_state('dm95:top')",
+        "components": {
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              0,
+              -8
+            ],
+            "size": [
+              16,
+              16.0,
+              16
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

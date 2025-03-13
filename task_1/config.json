@@ -49,9 +49,8 @@
 			},
 			"local": {
 				"export": {
-					"bpName": "'BP'",
+                    "build": "standard",
 					"readOnly": false,
-					"rpName": "'RP'",
 					"target": "local"
 				},
 				"filters": [
@@ -69,6 +68,7 @@
 					}
 				]
 			}
-		}
+		},
+		"useAppData": true
 	}
 }

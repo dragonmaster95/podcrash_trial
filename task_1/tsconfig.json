@@ -1,12 +1,10 @@
 {
 	"compilerOptions": {
 		"target": "es6",
-		"moduleResolution": "Node",
+		"moduleResolution": "Node10",
 		"module": "ES2020",
 		"declaration": false,
 		"noLib": false,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
 		"sourceMap": true,
 		"pretty": true,
 		"forceConsistentCasingInFileNames": true,
@@ -16,11 +14,11 @@
 		"noImplicitAny": true,
 		"noImplicitReturns": false,
 		"noImplicitUseStrict": false,
-		"outDir": "lib",
+		"outDir": "build/BP",
 		"rootDir": ".",
-		"baseUrl": "packs/behavior_packs/",
+		"baseUrl": ".",
 		"listFiles": false,
-		"noEmitHelpers": true,
+		"noEmitHelpers": false,
 		"skipLibCheck": true
 	},
 	"include": ["scripts/**/*"],
