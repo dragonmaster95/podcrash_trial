@@ -1,3 +1,2 @@
-import { world } from "@minecraft/server";
-world.sendMessage("Load test");
+import "./Register";
 //# sourceMappingURL=main.js.map
