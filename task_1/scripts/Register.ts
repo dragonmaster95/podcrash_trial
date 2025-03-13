@@ -1,5 +1,6 @@
 import { WorldInitializeBeforeEvent, world } from "@minecraft/server";
-import { TwoTallCropBlock } from "./block/TwoTallCrops"
+import { TwoTallCrops } from "./block/TwoTallCrops"
+import { CropGrowth } from "./block/RandomCropGrowth"
 
 export class Register {
 	constructor() {
@@ -8,7 +9,8 @@ export class Register {
 
 	static blockEvents() {
 		world.beforeEvents.worldInitialize.subscribe((e: WorldInitializeBeforeEvent) => {
-			e.blockComponentRegistry.registerCustomComponent(TwoTallCropBlock.COMPONENT_ID, new TwoTallCropBlock());
+			e.blockComponentRegistry.registerCustomComponent(TwoTallCrops.COMPONENT_ID, new TwoTallCrops());
+			e.blockComponentRegistry.registerCustomComponent(CropGrowth.COMPONENT_ID, new CropGrowth());
 		});
 	}
 }

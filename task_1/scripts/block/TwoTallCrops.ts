@@ -15,7 +15,7 @@ import {
   Block,
 } from "@minecraft/server";
 
-export class TwoTallCropBlock implements BlockCustomComponent {
+export class TwoTallCrops implements BlockCustomComponent {
   public static COMPONENT_ID = "dm95:two_tall_crop";
   public static MAX_GROWTH = 7;
 
@@ -25,7 +25,7 @@ export class TwoTallCropBlock implements BlockCustomComponent {
     //this.onPlayerInteract = this.onPlayerInteract.bind(this);
   }
 
-  public beforeOnPlayerPlace({block,player,permutationToPlace,cancel,}: BlockComponentPlayerPlaceBeforeEvent): void {
+  public beforeOnPlayerPlace({block,player,permutationToPlace,cancel}: BlockComponentPlayerPlaceBeforeEvent): void {
     if (!player) return;
     cancel = placeBlock(block, player, permutationToPlace);
   }
@@ -37,12 +37,12 @@ export class TwoTallCropBlock implements BlockCustomComponent {
   public onPlayerInteract({block,player,}: BlockComponentPlayerInteractEvent): void {
     if (!player) return;
 
-    const test = TwoTallCropBlock.MAX_GROWTH;
+    const test = TwoTallCrops.MAX_GROWTH;
 
     let growth = block.permutation.getState("dm95:growth") as number;
 
     //Check for bone_meal
-    if (growth < TwoTallCropBlock.MAX_GROWTH) {
+    if (growth < TwoTallCrops.MAX_GROWTH) {
       const equippable = player.getComponent(
         EntityComponentTypes.Equippable
       ) as EntityEquippableComponent;
@@ -78,7 +78,7 @@ function growCrop(block: Block, growth: number, player: Player, mainhand: Contai
   growth =
     player.getGameMode() === GameMode.creative
       ? 7
-      : (growth += randomInt(1, TwoTallCropBlock.MAX_GROWTH - growth));
+      : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
   block.setPermutation(block.permutation.withState("dm95:growth", growth));
 
   const isTopHalf = block.permutation.getState("dm95:top");
@@ -89,7 +89,7 @@ function growCrop(block: Block, growth: number, player: Player, mainhand: Contai
     );
   } else {
     const aboveBlock = block.above();
-    if (aboveBlock?.typeId !== block.typeId) {
+    if (!aboveBlock?.matches(block.typeId)) {
       block.setType("minecraft:air");
       return true;
     }

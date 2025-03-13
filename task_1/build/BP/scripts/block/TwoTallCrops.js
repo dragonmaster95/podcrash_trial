@@ -1,11 +1,11 @@
 import { world, BlockPermutation, EquipmentSlot, GameMode, EntityComponentTypes, } from "@minecraft/server";
-export class TwoTallCropBlock {
+export class TwoTallCrops {
     constructor() {
         this.beforeOnPlayerPlace = this.beforeOnPlayerPlace.bind(this);
         this.onPlayerDestroy = this.onPlayerDestroy.bind(this);
         //this.onPlayerInteract = this.onPlayerInteract.bind(this);
     }
-    beforeOnPlayerPlace({ block, player, permutationToPlace, cancel, }) {
+    beforeOnPlayerPlace({ block, player, permutationToPlace, cancel }) {
         if (!player)
             return;
         cancel = placeBlock(block, player, permutationToPlace);
@@ -16,10 +16,10 @@ export class TwoTallCropBlock {
     onPlayerInteract({ block, player, }) {
         if (!player)
             return;
-        const test = TwoTallCropBlock.MAX_GROWTH;
+        const test = TwoTallCrops.MAX_GROWTH;
         let growth = block.permutation.getState("dm95:growth");
         //Check for bone_meal
-        if (growth < TwoTallCropBlock.MAX_GROWTH) {
+        if (growth < TwoTallCrops.MAX_GROWTH) {
             const equippable = player.getComponent(EntityComponentTypes.Equippable);
             if (!equippable)
                 return;
@@ -38,15 +38,15 @@ export class TwoTallCropBlock {
         }
     }
 }
-TwoTallCropBlock.COMPONENT_ID = "dm95:two_tall_crop";
-TwoTallCropBlock.MAX_GROWTH = 7;
+TwoTallCrops.COMPONENT_ID = "dm95:two_tall_crop";
+TwoTallCrops.MAX_GROWTH = 7;
 function growCrop(block, growth, player, mainhand) {
     var _a;
     // Grow crop fully in creative, otherwise give random amount
     growth =
         player.getGameMode() === GameMode.creative
             ? 7
-            : (growth += randomInt(1, TwoTallCropBlock.MAX_GROWTH - growth));
+            : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
     block.setPermutation(block.permutation.withState("dm95:growth", growth));
     const isTopHalf = block.permutation.getState("dm95:top");
     if (isTopHalf) {
@@ -55,7 +55,7 @@ function growCrop(block, growth, player, mainhand) {
     }
     else {
         const aboveBlock = block.above();
-        if ((aboveBlock === null || aboveBlock === void 0 ? void 0 : aboveBlock.typeId) !== block.typeId) {
+        if (!(aboveBlock === null || aboveBlock === void 0 ? void 0 : aboveBlock.matches(block.typeId))) {
             block.setType("minecraft:air");
             return true;
         }
@@ -106,9 +106,9 @@ function breakBlock(block, destroyedBlockPermutation) {
     blockToDestroy === null || blockToDestroy === void 0 ? void 0 : blockToDestroy.setPermutation(BlockPermutation.resolve("minecraft:air"));
 }
 world.afterEvents.pistonActivate.subscribe(({ piston, block }) => {
-    piston.getAttachedBlocksLocations().forEach((loc) => {
-        world.sendMessage(`${loc.x}, ${loc.y}, ${loc.z}`);
-    });
+    /*piston.getAttachedBlocksLocations().forEach((loc) => {
+      world.sendMessage(`${loc.x}, ${loc.y}, ${loc.z}`);
+    });*/
     piston.getAttachedBlocks().forEach((crop) => {
         if (crop.hasTag("dm95.two_tall_crop"))
             breakBlock(crop, crop.permutation);

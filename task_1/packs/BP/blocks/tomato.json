@@ -90,7 +90,9 @@
         {
           "condition": "q.block_state('dm95:growth') < 7 && !q.block_state('dm95:top')",
           "components": {
-            "minecraft:loot": "loot_tables/dm95/block/tomato_immature.json"
+            "minecraft:loot": "loot_tables/dm95/block/tomato_sprout.json",
+            //growth script only necessary when not fully grown:,
+            "minecraft:custom_components": ["dm95:crop_growth","dm95:two_tall_crop"]
           }
         },
         {
@@ -204,7 +206,6 @@
             }
           }
         },
-  
         {
           "condition": "q.block_state('dm95:growth') >= 2 && !q.block_state('dm95:top')",
           "components": {
@@ -225,7 +226,6 @@
             }
           }
         },
-  
         {
           "condition": "q.block_state('dm95:growth') == 2 && q.block_state('dm95:top')",
           "components": {
@@ -235,7 +235,6 @@
             }
           }
         },
-  
         {
           "condition": "q.block_state('dm95:growth') > 2 && q.block_state('dm95:top')",
           "components": {

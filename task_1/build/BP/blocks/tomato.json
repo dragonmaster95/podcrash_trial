@@ -99,7 +99,11 @@
       {
         "condition": "q.block_state('dm95:growth') < 7 && !q.block_state('dm95:top')",
         "components": {
-          "minecraft:loot": "loot_tables/dm95/block/tomato_immature.json"
+          "minecraft:loot": "loot_tables/dm95/block/tomato_sprout.json",
+          "minecraft:custom_components": [
+            "dm95:crop_growth",
+            "dm95:two_tall_crop"
+          ]
         }
       },
       {
