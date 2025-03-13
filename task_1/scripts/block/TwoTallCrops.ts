@@ -141,7 +141,10 @@ function breakBlock(block: Block, destroyedBlockPermutation: BlockPermutation) {
   let blockToDestroy = !destroyedBlockPermutation.getState("dm95:top")
     ? block.above()
     : block.below();
-  blockToDestroy?.setPermutation(BlockPermutation.resolve("minecraft:air"));
+  const loc = blockToDestroy?.location
+
+  //using /setblock command instead of .setType to cause relevant loot tables, particles etc. to trigger
+  block.dimension.runCommand(`/setblock ${loc?.x} ${loc?.y} ${loc?.z} air destroy`);
 }
 
 world.afterEvents.pistonActivate.subscribe(({ piston, block }) => {

@@ -1,4 +1,4 @@
-import { world, BlockPermutation, EquipmentSlot, GameMode, EntityComponentTypes, } from "@minecraft/server";
+import { world, EquipmentSlot, GameMode, EntityComponentTypes, } from "@minecraft/server";
 export class TwoTallCrops {
     constructor() {
         this.beforeOnPlayerPlace = this.beforeOnPlayerPlace.bind(this);
@@ -103,7 +103,9 @@ function breakBlock(block, destroyedBlockPermutation) {
     let blockToDestroy = !destroyedBlockPermutation.getState("dm95:top")
         ? block.above()
         : block.below();
-    blockToDestroy === null || blockToDestroy === void 0 ? void 0 : blockToDestroy.setPermutation(BlockPermutation.resolve("minecraft:air"));
+    const loc = blockToDestroy === null || blockToDestroy === void 0 ? void 0 : blockToDestroy.location;
+    //using /setblock command instead of .setType to cause relevant loot tables to trigger
+    block.dimension.runCommand(`/setblock ${loc === null || loc === void 0 ? void 0 : loc.x} ${loc === null || loc === void 0 ? void 0 : loc.y} ${loc === null || loc === void 0 ? void 0 : loc.z} air destroy`);
 }
 world.afterEvents.pistonActivate.subscribe(({ piston, block }) => {
     /*piston.getAttachedBlocksLocations().forEach((loc) => {
