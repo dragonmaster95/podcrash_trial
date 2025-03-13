@@ -1,0 +1,21 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "Task 1",
+		"description": "Task 1 Resource Pack",
+		"uuid": "c37b75d1-14ab-3ee2-d100-71630509d434",
+		"version": [1, 0, 0],
+		"min_engine_version": [1, 16, 0]
+	},
+	"metadata": {
+		"authors": ["dragonmaster95"]
+	},
+	"modules": [
+		{
+			"description": "Task 1 - Resources",
+			"type": "resources",
+			"uuid": "075d4119-47ce-d8ad-8423-4666131685cf",
+			"version": [1, 0, 0]
+		}
+	]
+}

@@ -1,0 +1,12 @@
+{
+  "resource_pack_name": "Task 1",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "dm95:tomato": {
+      "textures": "textures/dm95/items/tomato"
+    },
+    "dm95:tomato_seeds": {
+      "textures": "textures/dm95/items/tomato_seeds"
+    }
+  }
+}

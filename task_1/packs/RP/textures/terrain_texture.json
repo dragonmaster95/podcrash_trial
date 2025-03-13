@@ -1,0 +1,29 @@
+{
+  "resource_pack_name": "Task 1",
+  "texture_name": "atlas.terrain",
+  "padding": 8,
+  "num_mip_levels": 4,
+  "texture_data": {
+    "dm95:tomato_stage_1": {
+      "textures": "textures/dm95/blocks/tomato/growth_1.png"
+    },
+    "dm95:tomato_stage_2": {
+      "textures": "textures/dm95/blocks/tomato/growth_2.png"
+    },
+    "dm95:tomato_stage_3": {
+      "textures": "textures/dm95/blocks/tomato/growth_3.png"
+    },
+    "dm95:tomato_stage_4": {
+      "textures": "textures/dm95/blocks/tomato/growth_4.png"
+    },
+    "dm95:tomato_stage_5": {
+      "textures": "textures/dm95/blocks/tomato/growth_5.png"
+    },
+    "dm95:tomato_stage_6": {
+      "textures": "textures/dm95/blocks/tomato/growth_6.png"
+    },
+    "dm95:tomato_stage_7": {
+      "textures": "textures/dm95/blocks/tomato/growth_7.png"
+    }
+  }
+}
