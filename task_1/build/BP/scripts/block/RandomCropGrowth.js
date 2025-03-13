@@ -10,7 +10,7 @@ CropGrowth.MAX_GROWTH = 7;
 CropGrowth.COMPONENT_ID = "dm95:crop_growth";
 ;
 function randomTick(block) {
-    const growthChance = 1 / 3;
+    const growthChance = 0.35;
     if (Math.random() > growthChance)
         return;
     const upBlock = block.above();
