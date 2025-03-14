@@ -18,7 +18,7 @@ export class TwoTallCrops {
             return;
         const test = TwoTallCrops.MAX_GROWTH;
         let growth = block.permutation.getState("dm95:growth");
-        //Check for bone_meal
+        //Check for bone_meal in hand
         if (growth < TwoTallCrops.MAX_GROWTH) {
             const equippable = player.getComponent(EntityComponentTypes.Equippable);
             if (!equippable)
@@ -26,11 +26,12 @@ export class TwoTallCrops {
             const mainhand = equippable.getEquipmentSlot(EquipmentSlot.Mainhand);
             if (mainhand.hasItem() && mainhand.typeId == "minecraft:bone_meal")
                 growCrop(block, growth, player, mainhand);
-            //Check if fruit is ripe
+            //Fruit is ripe, so harvest
         }
         else {
             const loc = block.center();
-            block.dimension.runCommandAsync(`loot spawn ${loc.x} ${loc.y} ${loc.z} loot "dm95/block/tomato_mature"`);
+            const fruit = block.typeId.split(":")[1];
+            block.dimension.runCommandAsync(`loot spawn ${loc.x} ${loc.y} ${loc.z} loot "dm95/block/${fruit}_mature"`);
             block.setPermutation(block.permutation.withState("dm95:growth", growth - 3));
             const isTopHalf = block.permutation.getState("dm95:top");
             const blockToChange = isTopHalf ? block.below() : block.above();
@@ -104,20 +105,26 @@ function breakBlock(block, destroyedBlockPermutation) {
         ? block.above()
         : block.below();
     const loc = blockToDestroy === null || blockToDestroy === void 0 ? void 0 : blockToDestroy.location;
-    //using /setblock command instead of .setType to cause relevant loot tables to trigger
+    //using /setblock command instead of .setType to cause relevant loot tables, particles etc. to trigger
     block.dimension.runCommand(`/setblock ${loc === null || loc === void 0 ? void 0 : loc.x} ${loc === null || loc === void 0 ? void 0 : loc.y} ${loc === null || loc === void 0 ? void 0 : loc.z} air destroy`);
 }
-world.afterEvents.pistonActivate.subscribe(({ piston, block }) => {
-    /*piston.getAttachedBlocksLocations().forEach((loc) => {
+world.afterEvents.pistonActivate.subscribe(({ piston }) => {
+    // WIP/DEBUG code
+    /*const loc1 = piston.block.location;
+    world.sendMessage(`Piston: ${loc1.x}, ${loc1.y}, ${loc1.z}`);
+    piston.getAttachedBlocksLocations().forEach((loc) => {
       world.sendMessage(`${loc.x}, ${loc.y}, ${loc.z}`);
-    });*/
-    piston.getAttachedBlocks().forEach((crop) => {
-        if (crop.hasTag("dm95.two_tall_crop"))
-            breakBlock(crop, crop.permutation);
     });
+    piston.getAttachedBlocks().forEach((crop) => {
+      const test = crop.getTags();
+        world.sendMessage(" ");
+        const loc = crop.location;
+        world.sendMessage(`${crop.typeId}: ${loc.x}, ${loc.y}, ${loc.z}`);
+        breakBlock(crop, crop.permutation);
+    });*/
 });
 world.afterEvents.blockExplode.subscribe(({ block }) => {
-    if (block.hasTag("dm95.two_tall_crop"))
+    if (block.permutation.hasTag("dm95.two_tall_crop"))
         breakBlock(block, block.permutation);
 });
 export function randomInt(min, max) {

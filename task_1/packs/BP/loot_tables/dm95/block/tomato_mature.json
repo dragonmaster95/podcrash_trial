@@ -5,7 +5,7 @@
             "entries": [
                 {
                     "type": "item",
-                    "name": "dm95:tomato",
+                    "name": "dm95:tomato_fruit",
                     "functions": [
                         {
                             "function": "set_count",

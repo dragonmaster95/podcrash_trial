@@ -41,7 +41,7 @@ export class TwoTallCrops implements BlockCustomComponent {
 
     let growth = block.permutation.getState("dm95:growth") as number;
 
-    //Check for bone_meal
+    //Check for bone_meal in hand
     if (growth < TwoTallCrops.MAX_GROWTH) {
       const equippable = player.getComponent(
         EntityComponentTypes.Equippable
@@ -52,12 +52,13 @@ export class TwoTallCrops implements BlockCustomComponent {
       if (mainhand.hasItem() && mainhand.typeId == "minecraft:bone_meal")
         growCrop(block, growth, player, mainhand);
 
-      //Check if fruit is ripe
+    //Fruit is ripe, so harvest
     } else {
       const loc = block.center();
 
+      const fruit = block.typeId.split(":")[1];
       block.dimension.runCommandAsync(
-        `loot spawn ${loc.x} ${loc.y} ${loc.z} loot "dm95/block/tomato_mature"`
+        `loot spawn ${loc.x} ${loc.y} ${loc.z} loot "dm95/block/${fruit}_mature"`
       );
 
       block.setPermutation(
@@ -147,18 +148,24 @@ function breakBlock(block: Block, destroyedBlockPermutation: BlockPermutation) {
   block.dimension.runCommand(`/setblock ${loc?.x} ${loc?.y} ${loc?.z} air destroy`);
 }
 
-world.afterEvents.pistonActivate.subscribe(({ piston, block }) => {
-  /*piston.getAttachedBlocksLocations().forEach((loc) => {
+world.afterEvents.pistonActivate.subscribe(({ piston }) => {
+  // WIP/DEBUG code
+  /*const loc1 = piston.block.location;
+  world.sendMessage(`Piston: ${loc1.x}, ${loc1.y}, ${loc1.z}`);
+  piston.getAttachedBlocksLocations().forEach((loc) => {
     world.sendMessage(`${loc.x}, ${loc.y}, ${loc.z}`);
-  });*/
-  piston.getAttachedBlocks().forEach((crop) => {
-    if (crop.hasTag("dm95.two_tall_crop"))
-      breakBlock(crop, crop.permutation);
   });
+  piston.getAttachedBlocks().forEach((crop) => {
+    const test = crop.getTags();
+      world.sendMessage(" ");
+      const loc = crop.location;
+      world.sendMessage(`${crop.typeId}: ${loc.x}, ${loc.y}, ${loc.z}`);
+      breakBlock(crop, crop.permutation);
+  });*/
 });
 
 world.afterEvents.blockExplode.subscribe(({ block }) => {
-  if (block.hasTag("dm95.two_tall_crop"))
+  if (block.permutation.hasTag("dm95.two_tall_crop"))
     breakBlock(block, block.permutation);
 });
 
