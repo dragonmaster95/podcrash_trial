@@ -1,14 +1,12 @@
 {
     "format_version": "1.10.0",
     "animation_controllers": {
-      "controller.animation.mole.main": {
+      "controller.animation.mole.walk": {
         "initial_state": "default",
         "states": {
           "default": {
             "animations": ["idle"],
             "transitions": [
-              { "unbury": "q.property('podcrash:state') == 'unbury'" },
-              { "bury": "q.property('podcrash:state') == 'bury'" },
               { "move": "q.property('podcrash:state') == 'unburrowed' && query.modified_move_speed > 0.01" },
               { "move_underground": "q.property('podcrash:state') == 'burrowed' && query.modified_move_speed > 0.01" }
             ],
@@ -20,16 +18,27 @@
             "transitions": [
               { "default": "!q.property('podcrash:state') == 'burrowed' || query.modified_move_speed < 0.01" }
             ],
-            "blend_transition": 0.2
+            "blend_transition": 0.1
           },
   
           "move_underground": {
             "particle_effects": [
               { "effect": "mole_buried" }
             ],
-            "animations": ["walk"],
             "transitions": [
               { "default": "!q.property('podcrash:state') == 'unburrowed' || query.modified_move_speed < 0.01" }
+            ],
+            "blend_transition": 0.1
+          }
+        }
+      },
+      "controller.animation.mole.state": {
+        "initial_state": "default",
+        "states": {
+          "default": {
+            "transitions": [
+              { "unbury": "q.property('podcrash:state') == 'unbury'" },
+              { "bury": "q.property('podcrash:state') == 'bury'" }
             ],
             "blend_transition": 0.2
           },
@@ -37,7 +46,7 @@
           "unbury": {
             "animations": ["unbury"],
             "transitions": [
-                { "default": "q.property('podcrash:state') == 'unburrowed'" }
+                { "default": "q.all_animations_finished" }
             ],
             "blend_transition": 0.2
           },
@@ -45,7 +54,7 @@
           "bury": {
             "animations": ["bury"],
             "transitions": [
-                { "default": "q.property('podcrash:state') == 'burrowed'" }
+                { "default": "q.all_animations_finished" }
             ],
             "blend_transition": 0.2
           }

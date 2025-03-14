@@ -18,11 +18,13 @@
 				"unbury": "animation.mole.unbury",
 				"bury": "animation.mole.bury",
 				
-				"ctrl.main": "controller.animation.mole.main"
+				"ctrl.main": "controller.animation.mole.walk",
+				"ctrl.state": "controller.animation.mole.state"
 			},
 			"scripts": {
 				"animate": [
-					"ctrl.main"
+					{"ctrl.main": "q.property('podcrash:state') == 'unburrowed' || q.property('podcrash:state') == 'burrowed'"},
+					{"ctrl.state": "q.property('podcrash:state') == 'unbury' || q.property('podcrash:state') == 'bury'"}
 				]
 			},
 			"render_controllers": ["controller.render.default"],

@@ -16,7 +16,8 @@
             "loop": true,
 			"timeline": {
                 "0.4": [
-                    "/effect @s invisibility 0"
+                    "/effect @s invisibility 0",
+                    "/scriptevent podcrash:mole_unbury"
                 ],
 				"1.4": [
                     "/event entity @s podcrash:unburrowed"
