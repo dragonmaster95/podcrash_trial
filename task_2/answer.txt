@@ -1,0 +1,88 @@
+To generate several files all based on a tempalte I'd use Regolith's jsonte filter.
+
+Under the assumption of consistent texture file names (like tomato.png and tomato_fruit.png) 
+I'd create a data.json in packs/data/jsonte/data.json, which would contain data like this:
+
+{
+	"2_tall_plants": [
+		{"seed": "tomato", "fruit": "tomato_fruit"},
+		{"seed": "lemon", "fruit": "lemon_fruit"},
+		{"seed": "lime", "fruit": "lime_fruit"},
+		.
+		.
+		.
+		{"seed": "grape", "fruit": "grape_fruit"}
+	]
+}
+This example is kept relatively simple. We we could make the values relative paths too if we 
+want more folder structure or have a more inconsistent naming structure for the textures 
+or create entries for folder names or modules etc.
+Several lists can be included in the data.json depending on preference and necessity.
+
+
+I'd then rename and adjust all currently existing tomato related .json files (both in the BP
+and the RP) to .templ files.
+
+e.g. I'd rename the item file "tomato_seeds.json" to "fruit_seeds.json" and adjust it from
+{
+	"format_version": "1.21.60",
+	"minecraft:item": {
+		"description": {
+			"identifier": "dm95:tomato",
+			"menu_category": {
+				"category": "nature",
+				"group": "minecraft:itemGroup.name.seed"
+			}
+		},
+
+		"components": {
+			"minecraft:icon": "dm95:tomato_seeds",
+        "minecraft:compostable": {
+            "composting_chance": 30
+        },
+            "minecraft:block_placer": {
+                "block": "dm95:tomato",
+                "replace_block_item": true
+            }
+        }
+    }
+}
+
+to
+{
+    "$files": {"array": "2_tall_plants", "fileName": "{{seed}}"},
+    "$template": {
+        "format_version": "1.21.60",
+        "minecraft:item": {
+			"description": {
+			    "identifier": "dm95:{{seed}}",
+			    "menu_category": {
+			    	"category": "nature",
+			    	"group": "minecraft:itemGroup.name.seed"
+			    },
+			    "components": {
+			    	"minecraft:icon": "dm95:{{seed}}",
+			    	"minecraft:compostable": {
+			    		"composting_chance": 30
+			    	},
+			    	"minecraft:block_placer": {
+			    		"block": "dm95:{{seed}}",
+			    		"replace_block_item": true
+			    	}
+			    }
+            }
+        }
+    }
+}
+
+Which will create tomato.json, lemon.json, lime.json, ... and grape.json in the exported pack 
+using `regolith run`.
+
+I'd repeat that step for the fruit (currently tomato.json), rename it to fruit.json, 
+and ofc instead of {{seed}} use {{fruit}} as variable, which create tomato_fruit.json and so on.
+
+Same principle applies to the other tomato related files that are by themselves.
+
+For none .json files like en_US.lang I'd probably write a small python script or manually write it
+once (depending on how likely it is for those names to change significantly or not and how close
+the item name is to the translation).
