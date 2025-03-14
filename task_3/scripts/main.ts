@@ -1,4 +1,4 @@
-import { world, Player, Vector3, Vector2, InputPermissionCategory, system, CameraEaseOptions, EasingType, PlayerLeaveBeforeEvent, PlayerSpawnAfterEvent } from "@minecraft/server";
+import { world, Player, Vector3, Vector2, InputPermissionCategory, system, CameraEaseOptions, EasingType, PlayerLeaveBeforeEvent, PlayerSpawnAfterEvent, TicksPerSecond } from "@minecraft/server";
 
 class CutsceneKeyframe {
   public position: Vector3;
@@ -48,28 +48,37 @@ class Cutscene {
 
     public movetoNextFrame() {
       this.progress += 1;
-      world.sendMessage(`Frame: ${this.progress}`)
-      if (this.keyframes.length < this.progress) this.end();
-      const currentFrame = this.keyframes[this.progress];
-      for (const player of this.players) {
-        // Disable player movement
-        setPlayerMovement(player, false);
-        player.camera.setCamera("minecraft:free",{"location":currentFrame.position,"rotation":currentFrame.angle,"easeOptions":currentFrame.easing})
+      world.sendMessage(`Frame: ${this.progress}/${this.keyframes.length}`)
+      if (this.keyframes.length <= this.progress) {
+        this.end();
+      } else {
+        const currentFrame = this.keyframes[this.progress];
+        const pos = currentFrame.position
+        world.sendMessage(`${pos.x} ${pos.y} ${pos.z}`);
+        for (const player of this.players) {
+          // Disable player movement
+          
+			    player.teleport(this.keyframes[0].position);
+          setPlayerMovement(player, false);
+          player.camera.setCamera("minecraft:free",{"location":currentFrame.position,"rotation":currentFrame.angle,"easeOptions":currentFrame.easing})
+        }
+        this.keyframeTimer = system.runTimeout(() => this.movetoNextFrame(), currentFrame.easing.easeTime as number *TicksPerSecond);
       }
-      this.keyframeTimer = system.runTimeout(() => this.movetoNextFrame(), currentFrame.easing.easeTime);
     }
 
     public end() {
+      world.sendMessage("cutscene end");
       //clear timer in case this is getting called before the cutscene ended
       system.clearRun(this.keyframeTimer);
       this.keyframeTimer = -1;
 
       if (this.players == undefined) return;
-      const lastKeyframe = this.keyframes[this.keyframes.length];
+      const lastKeyframe = this.keyframes[this.keyframes.length-1];
       for (const player of this.players) {
         player.teleport(lastKeyframe.position, {rotation: lastKeyframe.angle})
         player.setDynamicProperty("cutscenePos");
         setPlayerMovement(player,true);
+        player.camera.clear();
       }
     }
 
@@ -109,9 +118,9 @@ system.afterEvents.scriptEventReceive.subscribe(e => {
 
       //setup cutscene keyframes:
       const keyframes = [
-        new CutsceneKeyframe({x: 0, y:50, z: 0}, {x: 0,y: 0}, {easeTime:0, easeType: EasingType.Linear}),
-        new CutsceneKeyframe({x:10, y:50, z:10}, {x:30,y: 0}, {easeTime:1, easeType: EasingType.Linear}),
-        new CutsceneKeyframe({x:20, y:50, z: 0}, {x: 0,y:20}, {easeTime:3, easeType: EasingType.Linear})
+        new CutsceneKeyframe({x: 0.5, y:80, z: 0.5}, {x: 0,y: 0}, {easeTime:0, easeType: EasingType.Linear}),
+        new CutsceneKeyframe({x:10.5, y:90, z:10.5}, {x:30,y: 0}, {easeTime:3, easeType: EasingType.Linear}),
+        new CutsceneKeyframe({x:20.5, y:70, z: 0.5}, {x: 0,y:20}, {easeTime:1, easeType: EasingType.Linear})
       ];
 
       //create and play cutscene
