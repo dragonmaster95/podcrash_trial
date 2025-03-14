@@ -54,33 +54,45 @@ const customFishChance = 10 //out of 100
 
 function beforeCasting(data: ItemUseBeforeEvent) {
   let player = data.source;
-  if (!player.typeId.endsWith("player")) return;
-
-  if (!data.itemStack.typeId.endsWith("fishing_rod")) return;
+  if (player.typeId !== "minecraft:player") return;
+  if (data.itemStack.typeId !== "minecraft:fishing_rod") return;
 
   activeBobbers.push(new BobberPlayer(system.currentTick, player));
 }
 
 function afterCasting(data: EntitySpawnAfterEvent) {
-  const bobber = data.entity;
-  if (!bobber.typeId.endsWith("hook")) return;
+  const entity = data.entity;
+  const id = entity.typeId;
 
-  const sameTick = activeBobbers.filter((player) => player.tick === system.currentTick);
-  let closestPlayer = sameTick[0];
-  if (sameTick.length > 1) {
-    let minDistance = distance3D(sameTick[0].player.location, bobber.location);
-    for (let i; (i = 1); i < sameTick.length) {
-      const distance = distance3D(sameTick[i].player.location, bobber.location);
-      if (distance < minDistance) minDistance = distance;
-      closestPlayer = sameTick[i];
+	//in case the player picks up the item entity too fast
+	if (!entity.isValid()) return;
+
+  if (id === "minecraft:fishing_hook") {
+    const sameTick = activeBobbers.filter((player) => player.tick === system.currentTick);
+    let closestPlayer = sameTick[0];
+    if (sameTick.length > 1) {
+      let minDistance = distance3D(sameTick[0].player.location, entity.location);
+      for (let i; (i = 1); i < sameTick.length) {
+        const distance = distance3D(sameTick[i].player.location, entity.location);
+        if (distance < minDistance) minDistance = distance;
+        closestPlayer = sameTick[i];
+      }
     }
+    closestPlayer.addBobber(entity);
+  } else if (id === "minecraft:item") {
+    entity.addTag("dm95:recent_spawn");
+    system.runTimeout(() => removeRecentSpawnTag(entity), 1)
   }
-  closestPlayer.addBobber(bobber);
+
+}
+
+function removeRecentSpawnTag(entity: Entity) {
+  if (entity.isValid()) entity.removeTag("dm95:recent_spawn");
 }
 
 function beforeReeling(data: EntityRemoveBeforeEvent) {
   const bobber = data.removedEntity;
-  if (!bobber.typeId.endsWith("hook")) return;
+  if (bobber.typeId !== "minecraft:fishing_hook") return;
 
   const bobberEntry = activeBobbers.find((active) => active.bobber == bobber);
   if (!bobberEntry) {
@@ -92,7 +104,7 @@ function beforeReeling(data: EntityRemoveBeforeEvent) {
 
 function afterReeling(data: EntityRemoveAfterEvent) {
   const bobber = data.typeId;
-  if (!bobber.endsWith("hook")) return;
+  if (bobber !== "minecraft:fishing_hook") return;
 
 
 
@@ -106,10 +118,11 @@ function afterReeling(data: EntityRemoveAfterEvent) {
       location: bobber.pullLocation,
       closest: 1,
       type: "minecraft:item",
-      maxDistance: 5 
-      // Note: the items spawn in/are surprisingly far away from the bobber location (more than 2 blocks). 
-      // no matter the distance though it's easy to fake getting the custom fish by dropping a salmon and fishing near it.
+      tags: ["dm95:recent_spawn"],
+      maxDistance: 5
     })
+
+
     if (pulledEntities.length == 0) return;
     const pulledEntity = pulledEntities[0] as Entity;
 
@@ -120,7 +133,7 @@ function afterReeling(data: EntityRemoveAfterEvent) {
     const itemType = stack.typeId;
 
     //if fish and 10% chance
-    if (itemType.endsWith(":salmon") || itemType.endsWith(":cod")) {
+    if (itemType === "minecraft:salmon" || itemType === "minecraft:cod") {
       world.sendMessage("Debug: Salmon/Cod caught")
       const chance = Math.random();
       if (chance <= customFishChance/100.0) {
@@ -156,7 +169,7 @@ function afterReeling(data: EntityRemoveAfterEvent) {
         pulledEntity.remove();
       }
       else {
-        world.sendMessage(`Debug: Too bad, no custom fish (10% are surprisingly low odds)`)  
+        world.sendMessage(`Debug: Too bad, no custom fish (${customFishChance}/100 are surprisingly low odds)`)  
       }
     }
 
