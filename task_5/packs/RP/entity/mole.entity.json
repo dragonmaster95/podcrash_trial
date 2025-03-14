@@ -18,16 +18,14 @@
 				"unbury": "animation.mole.unbury",
 				"bury": "animation.mole.bury",
 				
-				"controller.main": "controller.animation.podcrash.mole.main"
+				"ctrl.main": "controller.animation.mole.main"
 			},
 			"scripts": {
 				"animate": [
-					"controller.main"
+					"ctrl.main"
 				]
 			},
-			"render_controllers": [
-				"controller.render.podcrash.mole"
-			],
+			"render_controllers": ["controller.render.default"],
 			"particle_effects": {
                 "mole_buried": "podcrash:mole_buried",
                 "mole_bury": "podcrash:mole_bury"

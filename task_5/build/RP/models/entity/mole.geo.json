@@ -18,7 +18,10 @@
 				{
 					"name": "torso",
 					"parent": "body",
-					"pivot": [-0.10905, 2, 0.49762]
+					"pivot": [-0.10905, 2, 0.49762],
+					"locators": {
+						"lead": [0, 4, -1]
+					}
 				},
 				{
 					"name": "chest",

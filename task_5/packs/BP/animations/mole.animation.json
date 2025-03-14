@@ -1,0 +1,27 @@
+{
+    "format_version": "1.10.0",
+    "animations": {
+        "animation.mole.bury": {
+            "animation_length": 1.5,
+            "loop": true,
+			"timeline": {
+				"1.4": [
+                    "/effect @s invisibility 9999999 0 true",
+                    "/event entity @s podcrash:burrowed"
+				]
+			}
+        },
+        "animation.mole.unbury": {
+            "animation_length": 1.5,
+            "loop": true,
+			"timeline": {
+                "0.4": [
+                    "/effect @s invisibility 0"
+                ],
+				"1.4": [
+                    "/event entity @s podcrash:unburrowed"
+				]
+			}
+        }
+    }
+}
