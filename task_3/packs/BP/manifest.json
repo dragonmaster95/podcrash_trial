@@ -1,0 +1,36 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "Task 1",
+		"description": "Task 3 - Behavior Pack",
+		"uuid": "0ffcd913-db20-4bf4-8fc4-b1f66f8a0837",
+		"version": [1, 0, 0],
+		"min_engine_version": [1, 16, 0]
+	},
+	"metadata": {
+		"authors": ["dragonmaster95"]
+	},
+	"modules": [
+		{
+			"description": "Task 3 - Behavior",
+			"version": [1, 0, 0],
+			"uuid": "17209244-7447-4e6e-978d-cfc527fecaf0",
+			"type": "data"
+		},
+		{
+			"type": "script",
+			"language": "javascript",
+			"uuid": "d9b7d770-175d-4ce3-bc08-8628a616b144",
+			"entry": "scripts/main.js",
+			"version": [
+				1,
+				0,
+				0
+			]
+		}
+	],
+	"dependencies": [
+        { "module_name": "@minecraft/common", "version": "1.2.0" },
+        { "module_name": "@minecraft/server", "version": "1.17.0" }
+	]
+}
