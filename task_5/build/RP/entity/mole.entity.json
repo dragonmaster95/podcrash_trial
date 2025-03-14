@@ -1,0 +1,41 @@
+{
+	"format_version": "1.10.0",
+	"minecraft:client_entity": {
+		"description": {
+			"identifier": "podcrash:mole",
+			"materials": {
+				"default": "entity_alphatest"
+			},
+			"textures": {
+				"default": "textures/podcrash/entities/mole"
+			},
+			"geometry": {
+				"default": "geometry.podcrash.mole"
+			},
+			"animations": {
+				"walk": "animation.mole.walk",
+				"idle": "animation.mole.idle",
+				"unbury": "animation.mole.unbury",
+				"bury": "animation.mole.bury",
+				
+				"controller.main": "controller.animation.podcrash.mole.main"
+			},
+			"scripts": {
+				"animate": [
+					"controller.main"
+				]
+			},
+			"render_controllers": [
+				"controller.render.podcrash.mole"
+			],
+			"particle_effects": {
+                "mole_buried": "podcrash:mole_buried",
+                "mole_bury": "podcrash:mole_bury"
+			},
+			"spawn_egg": {
+				"base_color": "#3b3333",
+				"overlay_color": "#9c6257"
+			}
+		}
+	}
+}

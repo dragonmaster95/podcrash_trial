@@ -1,0 +1,64 @@
+{
+	"$schema": "https://raw.githubusercontent.com/Bedrock-OSS/regolith-schemas/main/config/v1.1.json",
+	"author": "dragonmaster95",
+	"name": "Task 5",
+	"packs": {
+		"behaviorPack": "./packs/BP",
+		"resourcePack": "./packs/RP"
+	},
+	"regolith": {
+		"dataPath": "./packs/data",
+		"filterDefinitions": {
+			"jsonte": {
+				"url": "github.com/MCDevKit/regolith-library",
+				"version": "2.15.0"
+			},
+			"texture_list": {
+				"url": "github.com/Bedrock-OSS/regolith-filters",
+				"version": "1.1.3"
+			},
+			"ts_transpiler": {
+				"url": "github.com/MajestikButter/Regolith-Filters",
+				"version": "6fa6a6a9298f7d033d0f2e421edfb33292807aae"
+			}
+		},
+		"profiles": {
+			"default": {
+				"export": {
+					"readOnly": false,
+					"target": "development"
+				},
+				"filters": [
+					{
+						"filter": "texture_list"
+					},
+					{
+						"filter": "jsonte"
+					},
+					{
+						"filter": "ts_transpiler"
+					}
+				]
+			},
+			"local": {
+				"export": {
+                    "build": "standard",
+					"readOnly": false,
+					"target": "local"
+				},
+				"filters": [
+					{
+						"filter": "texture_list"
+					},
+					{
+						"filter": "jsonte"
+					},
+					{
+						"filter": "ts_transpiler"
+					}
+				]
+			}
+		},
+		"useAppData": true
+	}
+}

@@ -1,0 +1,260 @@
+{
+  "format_version": "1.20.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "podcrash:mole",
+      "is_summonable": true,
+      "is_spawnable": true,
+      "properties": {
+        "podcrash:state": {
+          "client_sync": true,
+          "default": "unburrowed",
+          "type": "enum",
+          "values": ["unburrowed", "burying", "burrowed", "unburying"]
+        }
+      }
+    },
+    "components": {
+      "minecraft:collision_box": {
+        "width": 0.8,
+        "height": 0.5
+      },
+      "minecraft:is_hidden_when_invisible": {},
+      "minecraft:type_family": {
+        "family": ["podcrash", "mole", "podcrash:mole", "mob", "animal"]
+      },
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0
+      },
+      "minecraft:nameable": {},
+      "minecraft:health": {
+        "value": 10,
+        "max": 10
+      },
+      "minecraft:hurt_on_condition": {
+        "damage_conditions": [
+          {
+            "filters": {
+              "test": "in_lava",
+              "subject": "self",
+              "operator": "==",
+              "value": true
+            },
+            "cause": "lava",
+            "damage_per_tick": 4
+          }
+        ]
+      },
+      "minecraft:movement.basic": {},
+      "minecraft:despawn": {
+        "despawn_from_distance": {}
+      },
+      "minecraft:navigation.walk": {
+        "can_path_over_water": false,
+        "avoid_water": true,
+        "avoid_damage_blocks": true
+      },
+      "minecraft:ambient_sound_interval": {},
+      "minecraft:damage_sensor": {
+        "triggers": {
+          "on_damage": {
+            "filters": {
+              "any_of": [
+                { "test": "is_family", "subject": "other", "value": "mob" },
+                { "test": "is_family", "subject": "other", "value": "player" }
+              ]
+            },
+            "event": "minecraft:threat_detected"
+          }
+        }
+      },
+      "minecraft:jump.static": {},
+      "minecraft:can_climb": {},
+      "minecraft:preferred_path": {
+        "jump_cost": 20,
+        "default_block_cost": 99999,
+        "preferred_path_blocks": [
+          {
+            "blocks": [
+              "minecraft:dirt",
+              "minecraft:coarse_dirt",
+              "minecraft:grass_block"
+            ],
+
+            "cost": 0
+          }
+        ]
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.mount_pathing": {
+        "priority": 2,
+        "speed_multiplier": 1.5,
+        "target_dist": 0.0,
+        "track_target": false
+      },
+      "minecraft:behavior.random_stroll": {
+        "priority": 6,
+        "speed_multiplier": 1.0
+      },
+      "minecraft:physics": {},
+      "minecraft:conditional_bandwidth_optimization": {}
+    },
+
+    "component_groups": {
+      "podcrash:burrowed": {
+        "minecraft:movement": {
+          "value": 0.1
+        }
+      },
+      "podcrash:unburrowed": {
+        "minecraft:movement": {
+          "value": 0.14
+        },
+        "minecraft:leashable": {
+          "soft_distance": 4.0,
+          "hard_distance": 6.0,
+          "max_distance": 10.0
+        },
+        "minecraft:balloonable": {
+          "mass": 0.5
+        },
+        "minecraft:behavior.look_at_player": {
+          "priority": 7,
+          "target_distance": 6.0,
+          "probability": 0.02
+        },
+        "minecraft:behavior.random_look_around": {
+          "priority": 8
+        },
+        "minecraft:behavior.avoid_mob_type": {
+          "priority": 2,
+          "entity_types": [
+            {
+              "filters": {
+                "any_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  }
+                ]
+              },
+              "max_dist": 24,
+              "walk_speed_multiplier": 1,
+              "sprint_speed_multiplier": 1
+            }
+          ]
+        },
+        "minecraft:on_hurt_by_player": "podcrash:bury"
+      },
+      "podcrash:bury": {},
+      "podcrash:unbury": {},
+
+      "podcrash:normal_collission": {
+        "minecraft:collision_box": {
+          "width": 0.8,
+          "height": 0.5
+        },
+        "minecraft:pushable": {
+          "is_pushable": true,
+          "is_pushable_by_piston": true
+        },
+        "minecraft:push_through": {
+          "value": 1
+        }
+      },
+      "podcrash:burrowed_collission": {
+        "minecraft:collision_box": {
+          "width": 0.0,
+          "height": 0.0
+        },
+        "minecraft:pushable": {
+          "is_pushable": false,
+          "is_pushable_by_piston": false
+        },
+        "minecraft:push_through": {
+          "value": 0
+        }
+      },
+
+      "podcrash:freeze_movement": {
+        "minecraft:movement": { "value": 0.0 },
+        "minecraft:body_rotation_blocked": {}
+      }
+    },
+
+    "events": {
+      "minecraft:entity_spawned": {
+        "trigger": "podcrash:unburrowed"
+      },
+
+      //States
+      "podcrash:unburrowed": {
+        "set_property": { "podcrash:state": "unburrowed" },
+        "remove": {
+          "component_groups": [
+            "podcrash:unbury",
+            "podcrash:bury",
+            "podcrash:burrowed"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "podcrash:unburrowed",
+            "podcrash:normal_collision",
+            "podcrash:burrowed_collission"
+          ]
+        }
+      },
+      "podcrash:bury": {
+        "set_property": { "podcrash:state": "bury" },
+        "remove": {
+          "component_groups": [
+            "podcrash:unburrowed",
+            "podcrash:burrowed",
+            "podcrash:unburrowed"
+          ]
+        },
+        "add": {
+          "component_groups": ["podcrash:bury", "podcrash:freeze_movement"]
+        }
+      },
+      "podcrash:burrowed": {
+        "set_property": { "podcrash:state": "burrowed" },
+        "remove": {
+          "component_groups": [
+            "podcrash:bury",
+            "podcrash:bury",
+            "podcrash:unburrowed"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "podcrash:burrowed",
+            "podcrash:burrowed_collission"
+          ]
+        }
+      },
+      "podcrash:unbury": {
+        "set_property": { "podcrash:state": "unbury" },
+        "remove": {
+          "component_groups": [
+            "podcrash:burrowed",
+            "podcrash:bury",
+            "podcrash:unburrowed"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "podcrash:unbury",
+            "podcrash:freeze_movement",
+            "podcrash:burrowed_collission"
+          ]
+        }
+      }
+    }
+  }
+}

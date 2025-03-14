@@ -1,0 +1,52 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "Task 5",
+		"description": "Task 5 - Behavior Pack",
+		"uuid": "d2a57d48-a2a4-4a1c-a82c-dfb452c1f451",
+		"version": [1, 0, 0],
+		"min_engine_version": [1, 16, 0]
+	},
+	"metadata": {
+		"authors": ["dragonmaster95"]
+	},
+	"modules": [
+		{
+			"description": "Task 5 - Behavior",
+			"version": [1, 0, 0],
+			"uuid": "4759619d-9f6e-4672-8eb8-f6af7a4f8539",
+			"type": "data"
+		},
+		{
+			"type": "script",
+			"language": "javascript",
+			"uuid": "b0e45426-b9b9-4155-97c4-f514d3cf7600",
+			"entry": "scripts/main.js",
+			"version": [
+				1,
+				0,
+				0
+			]
+		}
+	],
+	"dependencies": [
+		{
+			"uuid": "fa90b974-59c0-4570-a870-ccf67c7866c7",
+			"version": [1, 0, 0]
+		},
+        { "module_name": "@minecraft/common", "version": "1.2.0" },
+        { "module_name": "@minecraft/server", "version": "1.17.0" }
+	]
+}
+
+
+
+
+
+
+
+
+65776947-698a-4615-ba37-dd589462a450
+
+7e266e78-2557-46a3-a510-1d1b464dbe05
+
