@@ -46,9 +46,7 @@ export class TwoTallCrops implements BlockCustomComponent {
 
     //Check for bone_meal in hand
     if (growth < TwoTallCrops.MAX_GROWTH) {
-      const equippable = player.getComponent(
-        EntityComponentTypes.Equippable
-      ) as EntityEquippableComponent;
+      const equippable = player.getComponent(EntityComponentTypes.Equippable) as EntityEquippableComponent;
       if (!equippable) return;
 
       const mainhand = equippable.getEquipmentSlot(EquipmentSlot.Mainhand);
@@ -68,54 +66,39 @@ export class TwoTallCrops implements BlockCustomComponent {
         block.permutation.withState("dm95:growth", growth - 3)
       );
 
-      const isTopHalf = block.permutation.getState("dm95:top");
-      const blockToChange = isTopHalf ? block.below() : block.above();
-      blockToChange?.setPermutation(
-        blockToChange?.permutation.withState("dm95:growth", growth - 3)
-      );
+      const otherHalf = block.permutation.getState("dm95:top") ? block.below() : block.above();
+      if (otherHalf?.matches(block.typeId)) otherHalf?.setPermutation(otherHalf?.permutation.withState("dm95:growth", growth - 3))
+      else destroyBlock(block)
     }
   }
 }
 
 function growCrop(block: Block, growth: number, player: Player, mainhand: ContainerSlot) {
   // Grow crop fully in creative, otherwise give random amount
-  growth =
-    player.getGameMode() === GameMode.creative
-      ? 7
-      : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
+  growth = player.getGameMode() === GameMode.creative ? 7 : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
   block.setPermutation(block.permutation.withState("dm95:growth", growth));
 
-  const isTopHalf = block.permutation.getState("dm95:top");
-  if (isTopHalf) {
-    const belowBlock = block.below();
-    belowBlock?.setPermutation(
-      belowBlock?.permutation.withState("dm95:growth", growth)
-    );
-  } else {
-    const aboveBlock = block.above();
-    if (!aboveBlock?.matches(block.typeId)) {
-      block.setType("minecraft:air");
-      return true;
+  const otherHalf = block.permutation.getState("dm95:top") ? block.below() : block.above()
+  if (otherHalf?.matches(block.typeId)) {
+    otherHalf?.setPermutation(otherHalf?.permutation.withState("dm95:growth", growth));
+    
+    // Decrement stack
+    if (!GameMode.creative) {
+      if (mainhand.amount > 1) mainhand.amount--;
+      else mainhand.setItem(undefined);
     }
-    aboveBlock?.setPermutation(
-      aboveBlock?.permutation.withState("dm95:growth", growth)
-    );
+
+    // Play effects
+    const dim = block.dimension;
+    const effectLocation = block.center();
+    dim.playSound("item.bone_meal.use", effectLocation);
+    dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
+    dim.spawnParticle("minecraft:crop_growth_emitter", otherHalf.center());
+  } else {
+    block.setType("minecraft:air");
+    return;
   }
-  const loc = block.above()?.location;
 
-  // Decrement stack
-  if (mainhand.amount > 1) mainhand.amount--;
-  else mainhand.setItem(undefined);
-
-  // Play effects
-  const dim = block.dimension;
-  const effectLocation = block.center();
-  dim.playSound("item.bone_meal.use", effectLocation);
-  dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
-  if (isTopHalf) effectLocation.y = effectLocation.y - 1;
-  else effectLocation.y = effectLocation.y + 1;
-  dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
-  return false;
 }
 
 function placeBlock(block: Block): void {

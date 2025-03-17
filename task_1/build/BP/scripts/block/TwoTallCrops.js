@@ -34,52 +34,41 @@ export class TwoTallCrops {
             const fruit = block.typeId.split(":")[1];
             block.dimension.runCommandAsync(`loot spawn ${loc.x} ${loc.y} ${loc.z} loot "dm95/block/${fruit}_mature"`);
             block.setPermutation(block.permutation.withState("dm95:growth", growth - 3));
-            const isTopHalf = block.permutation.getState("dm95:top");
-            const blockToChange = isTopHalf ? block.below() : block.above();
-            blockToChange === null || blockToChange === void 0 ? void 0 : blockToChange.setPermutation(blockToChange === null || blockToChange === void 0 ? void 0 : blockToChange.permutation.withState("dm95:growth", growth - 3));
+            const otherHalf = block.permutation.getState("dm95:top") ? block.below() : block.above();
+            if (otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.matches(block.typeId))
+                otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.setPermutation(otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.permutation.withState("dm95:growth", growth - 3));
+            else
+                destroyBlock(block);
         }
     }
 }
 TwoTallCrops.COMPONENT_ID = "dm95:two_tall_crop";
 TwoTallCrops.MAX_GROWTH = 7;
 function growCrop(block, growth, player, mainhand) {
-    var _a;
     // Grow crop fully in creative, otherwise give random amount
-    growth =
-        player.getGameMode() === GameMode.creative
-            ? 7
-            : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
+    growth = player.getGameMode() === GameMode.creative ? 7 : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
     block.setPermutation(block.permutation.withState("dm95:growth", growth));
-    const isTopHalf = block.permutation.getState("dm95:top");
-    if (isTopHalf) {
-        const belowBlock = block.below();
-        belowBlock === null || belowBlock === void 0 ? void 0 : belowBlock.setPermutation(belowBlock === null || belowBlock === void 0 ? void 0 : belowBlock.permutation.withState("dm95:growth", growth));
+    const otherHalf = block.permutation.getState("dm95:top") ? block.below() : block.above();
+    if (otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.matches(block.typeId)) {
+        otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.setPermutation(otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.permutation.withState("dm95:growth", growth));
+        // Decrement stack
+        if (!GameMode.creative) {
+            if (mainhand.amount > 1)
+                mainhand.amount--;
+            else
+                mainhand.setItem(undefined);
+        }
+        // Play effects
+        const dim = block.dimension;
+        const effectLocation = block.center();
+        dim.playSound("item.bone_meal.use", effectLocation);
+        dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
+        dim.spawnParticle("minecraft:crop_growth_emitter", otherHalf.center());
     }
     else {
-        const aboveBlock = block.above();
-        if (!(aboveBlock === null || aboveBlock === void 0 ? void 0 : aboveBlock.matches(block.typeId))) {
-            block.setType("minecraft:air");
-            return true;
-        }
-        aboveBlock === null || aboveBlock === void 0 ? void 0 : aboveBlock.setPermutation(aboveBlock === null || aboveBlock === void 0 ? void 0 : aboveBlock.permutation.withState("dm95:growth", growth));
+        block.setType("minecraft:air");
+        return;
     }
-    const loc = (_a = block.above()) === null || _a === void 0 ? void 0 : _a.location;
-    // Decrement stack
-    if (mainhand.amount > 1)
-        mainhand.amount--;
-    else
-        mainhand.setItem(undefined);
-    // Play effects
-    const dim = block.dimension;
-    const effectLocation = block.center();
-    dim.playSound("item.bone_meal.use", effectLocation);
-    dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
-    if (isTopHalf)
-        effectLocation.y = effectLocation.y - 1;
-    else
-        effectLocation.y = effectLocation.y + 1;
-    dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
-    return false;
 }
 function placeBlock(block) {
     //getting closest player for warning messages cause onPlace has no player component like beforeOnPlayerPlace had
