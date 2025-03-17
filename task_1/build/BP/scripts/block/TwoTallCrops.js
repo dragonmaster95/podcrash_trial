@@ -1,14 +1,15 @@
-import { world, EquipmentSlot, GameMode, EntityComponentTypes, } from "@minecraft/server";
+import { world, BlockPermutation, EquipmentSlot, GameMode, EntityComponentTypes, } from "@minecraft/server";
 export class TwoTallCrops {
     constructor() {
-        this.beforeOnPlayerPlace = this.beforeOnPlayerPlace.bind(this);
+        this.onPlace = this.onPlace.bind(this);
         this.onPlayerDestroy = this.onPlayerDestroy.bind(this);
-        //this.onPlayerInteract = this.onPlayerInteract.bind(this);
+        this.onPlayerInteract = this.onPlayerInteract.bind(this);
     }
-    beforeOnPlayerPlace({ block, player, permutationToPlace, cancel }) {
-        if (!player)
+    onPlace({ block }) {
+        //don't trigger for top half
+        if (block.permutation.getState("dm95:top"))
             return;
-        cancel = placeBlock(block, player, permutationToPlace);
+        placeBlock(block);
     }
     onPlayerDestroy({ block, destroyedBlockPermutation, }) {
         breakBlock(block, destroyedBlockPermutation);
@@ -80,31 +81,33 @@ function growCrop(block, growth, player, mainhand) {
     dim.spawnParticle("minecraft:crop_growth_emitter", effectLocation);
     return false;
 }
-function placeBlock(block, player, permutationToPlace) {
+function placeBlock(block) {
+    //getting closest player for warning messages cause onPlace has no player component like beforeOnPlayerPlace had
+    const player = block.dimension.getPlayers({ location: block.location, closest: 1 })[0];
     const upBlock = block.above();
     if (!(upBlock === null || upBlock === void 0 ? void 0 : upBlock.isAir)) {
-        player === null || player === void 0 ? void 0 : player.onScreenDisplay.setActionBar({
-            translate: "warning.dm95:actionbar.insufficient_space.crops",
-        });
-        return true;
+        player.onScreenDisplay.setActionBar({ translate: "warning.dm95:actionbar.insufficient_space.crops", });
+        world.sendMessage("not enough space");
+        destroyBlock(block);
+        return;
     }
     const loc = block.location;
     if (loc.y + 1 >= 320) {
-        player === null || player === void 0 ? void 0 : player.onScreenDisplay.setActionBar({
-            translate: "warning.dm95:actionbar.build_limit.crops",
-        });
-        return true;
+        player.onScreenDisplay.setActionBar({ translate: "warning.dm95:actionbar.build_limit.crops" });
+        destroyBlock(block);
+        return;
     }
-    upBlock === null || upBlock === void 0 ? void 0 : upBlock.setPermutation(permutationToPlace);
-    upBlock === null || upBlock === void 0 ? void 0 : upBlock.setPermutation(upBlock === null || upBlock === void 0 ? void 0 : upBlock.permutation.withState("dm95:top", true));
-    return false;
+    upBlock === null || upBlock === void 0 ? void 0 : upBlock.setPermutation(BlockPermutation.resolve(block.typeId).withState("dm95:top", true));
 }
 function breakBlock(block, destroyedBlockPermutation) {
     //Determine which block to remove
-    let blockToDestroy = !destroyedBlockPermutation.getState("dm95:top")
-        ? block.above()
-        : block.below();
-    const loc = blockToDestroy === null || blockToDestroy === void 0 ? void 0 : blockToDestroy.location;
+    let blockToDestroy = destroyedBlockPermutation.getState("dm95:top")
+        ? block.below()
+        : block.above();
+    destroyBlock(blockToDestroy);
+}
+function destroyBlock(block) {
+    const loc = block.location;
     //using /setblock command instead of .setType to cause relevant loot tables, particles etc. to trigger
     block.dimension.runCommand(`/setblock ${loc === null || loc === void 0 ? void 0 : loc.x} ${loc === null || loc === void 0 ? void 0 : loc.y} ${loc === null || loc === void 0 ? void 0 : loc.z} air destroy`);
 }

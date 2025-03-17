@@ -13,6 +13,8 @@ import {
   Player,
   ContainerSlot,
   Block,
+  BlockComponentOnPlaceEvent,
+  Vector3,
 } from "@minecraft/server";
 
 export class TwoTallCrops implements BlockCustomComponent {
@@ -20,14 +22,15 @@ export class TwoTallCrops implements BlockCustomComponent {
   public static MAX_GROWTH = 7;
 
   constructor() {
-    this.beforeOnPlayerPlace = this.beforeOnPlayerPlace.bind(this);
+    this.onPlace = this.onPlace.bind(this);
     this.onPlayerDestroy = this.onPlayerDestroy.bind(this);
-    //this.onPlayerInteract = this.onPlayerInteract.bind(this);
+    this.onPlayerInteract = this.onPlayerInteract.bind(this);
   }
 
-  public beforeOnPlayerPlace({block,player,permutationToPlace,cancel}: BlockComponentPlayerPlaceBeforeEvent): void {
-    if (!player) return;
-    cancel = placeBlock(block, player, permutationToPlace);
+  public onPlace({ block }: BlockComponentOnPlaceEvent): void {
+    //don't trigger for top half
+    if (block.permutation.getState("dm95:top")) return;
+    placeBlock(block);
   }
 
   public onPlayerDestroy({block,destroyedBlockPermutation,}: BlockComponentPlayerDestroyEvent): void {
@@ -115,35 +118,37 @@ function growCrop(block: Block, growth: number, player: Player, mainhand: Contai
   return false;
 }
 
-function placeBlock(block: Block, player: Player, permutationToPlace: BlockPermutation): boolean {
+function placeBlock(block: Block): void {
+  //getting closest player for warning messages cause onPlace has no player component like beforeOnPlayerPlace had
+  const player = block.dimension.getPlayers({location: block.location, closest: 1})[0];
   const upBlock = block.above();
   if (!upBlock?.isAir) {
-    player?.onScreenDisplay.setActionBar({
-      translate: "warning.dm95:actionbar.insufficient_space.crops",
-    });
-    return true;
+    player.onScreenDisplay.setActionBar({translate: "warning.dm95:actionbar.insufficient_space.crops",});
+    world.sendMessage("not enough space");
+    destroyBlock(block);
+    return;
   }
+
   const loc = block.location;
-
   if (loc.y + 1 >= 320) {
-    player?.onScreenDisplay.setActionBar({
-      translate: "warning.dm95:actionbar.build_limit.crops",
-    });
-    return true;
+    player.onScreenDisplay.setActionBar({translate: "warning.dm95:actionbar.build_limit.crops"});
+    destroyBlock(block);
+    return;
   }
-
-  upBlock?.setPermutation(permutationToPlace);
-  upBlock?.setPermutation(upBlock?.permutation.withState("dm95:top", true));
-  return false;
+  upBlock?.setPermutation(BlockPermutation.resolve(block.typeId).withState("dm95:top", true));
 }
 
 function breakBlock(block: Block, destroyedBlockPermutation: BlockPermutation) {
   //Determine which block to remove
-  let blockToDestroy = !destroyedBlockPermutation.getState("dm95:top")
-    ? block.above()
-    : block.below();
-  const loc = blockToDestroy?.location
+  let blockToDestroy = destroyedBlockPermutation.getState("dm95:top")
+    ? block.below()
+    : block.above();
 
+  destroyBlock(blockToDestroy!);
+}
+
+function destroyBlock(block:Block) {
+  const loc = block.location;
   //using /setblock command instead of .setType to cause relevant loot tables, particles etc. to trigger
   block.dimension.runCommand(`/setblock ${loc?.x} ${loc?.y} ${loc?.z} air destroy`);
 }
