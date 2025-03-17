@@ -7,8 +7,10 @@ export class TwoTallCrops {
         this.onPlayerDestroy = this.onPlayerDestroy.bind(this);
         this.onPlayerInteract = this.onPlayerInteract.bind(this);
     }
-    onPlace({ block }) {
+    onPlace({ block, previousBlock }) {
         //don't trigger for top half
+        if (previousBlock.type.id !== "minecraft:air")
+            return;
         if (block.permutation.getState("dm95:top"))
             return;
         placeBlock(block);
@@ -16,10 +18,11 @@ export class TwoTallCrops {
     onPlayerDestroy({ block, destroyedBlockPermutation, }) {
         breakOtherHalf(block, destroyedBlockPermutation);
     }
-    onPlayerInteract({ block, player, }) {
+    onPlayerInteract({ block, player }) {
         if (!player)
             return;
-        const test = MAX_GROWTH;
+        if (!block.permutation.hasTag(BLOCK_TAG))
+            return;
         let growth = block.permutation.getState("dm95:growth");
         //Check for bone_meal in hand
         if (growth < MAX_GROWTH) {
@@ -67,7 +70,7 @@ function growCrop(block, growth, player, mainhand) {
         dim.spawnParticle("minecraft:crop_growth_emitter", otherHalf.center());
     }
     else {
-        block.setType("minecraft:air");
+        destroyBlock(block);
         return;
     }
 }
@@ -77,9 +80,8 @@ function placeBlock(block) {
     //getting closest player for warning messages cause onPlace has no player component like beforeOnPlayerPlace had
     const player = block.dimension.getPlayers({ location: block.location, closest: 1 })[0];
     const upBlock = block.above();
-    if (!(upBlock === null || upBlock === void 0 ? void 0 : upBlock.isAir)) {
+    if (!upBlock.isAir) {
         player.onScreenDisplay.setActionBar({ translate: "warning.dm95:actionbar.insufficient_space.crops", });
-        world.sendMessage("not enough space");
         destroyBlock(block);
         return;
     }
@@ -89,7 +91,7 @@ function placeBlock(block) {
         destroyBlock(block);
         return;
     }
-    upBlock === null || upBlock === void 0 ? void 0 : upBlock.setPermutation(BlockPermutation.resolve(block.typeId).withState("dm95:top", true));
+    upBlock.setPermutation(BlockPermutation.resolve(block.typeId).withState("dm95:top", true));
 }
 function breakOtherHalf(block, perm) {
     //Determine which block to remove
@@ -104,6 +106,8 @@ function destroyBlock(block) {
     block.dimension.runCommand(`/setblock ${loc === null || loc === void 0 ? void 0 : loc.x} ${loc === null || loc === void 0 ? void 0 : loc.y} ${loc === null || loc === void 0 ? void 0 : loc.z} air destroy`);
 }
 world.afterEvents.pistonActivate.subscribe(({ piston }) => {
+    let blocksToDestroy = [];
+    //set offset based on piston facing and pushing state
     const state = piston.state;
     let offset = { x: 0, y: 0, z: 0 };
     const dir = piston.block.permutation.getState("facing_direction");
@@ -121,27 +125,33 @@ world.afterEvents.pistonActivate.subscribe(({ piston }) => {
         offset.x = -1;
     if (state === BlockPistonState.Retracting)
         offset = invertVector(offset);
-    const loc1 = piston.block.location;
     const dim = piston.block.dimension;
-    world.sendMessage(" ");
-    world.sendMessage(`Piston: ${loc1.x}, ${loc1.y}, ${loc1.z}`);
     piston.getAttachedBlocks().forEach((blockOrigin) => {
+        //resulting list is weird (gives location of the blocks before the were pushed), hence offset
         const loc = addVectors(blockOrigin.location, offset);
         const blockPushed = dim.getBlock(loc);
+        //check for part of crop above and below old positions
         const upBlock = blockOrigin.above();
         if (upBlock.hasTag(BLOCK_TAG) && upBlock.permutation.getState("dm95:top") == true) {
-            upBlock === null || upBlock === void 0 ? void 0 : upBlock.setType("minecraft:air");
-            destroyBlock(blockPushed);
+            blocksToDestroy.push(upBlock);
+            blocksToDestroy.push(blockPushed);
         }
         const downBlock = blockOrigin.below();
         if (downBlock.hasTag(BLOCK_TAG) && downBlock.permutation.getState("dm95:top") == false) {
-            destroyBlock(downBlock);
-            blockPushed.setType("minecraft:air");
+            blocksToDestroy.push(downBlock);
+            blocksToDestroy.push(blockPushed);
         }
-        world.sendMessage(`${blockPushed === null || blockPushed === void 0 ? void 0 : blockPushed.typeId}: ${loc.x}, ${loc.y}, ${loc.z}`);
-        //breakOtherHalf(crop, crop.permutation);
+        // sometimes doesn't remove all of them (not fully consistent)
+        // tried it with sytem.runTimeout too, but it didn't really feel any more consistent with that either 
+        // (especially if the piston fired on a redstone clock)
+        breakBlocks(blocksToDestroy);
     });
 });
+function breakBlocks(blocks) {
+    for (const block of blocks) {
+        destroyBlock(block);
+    }
+}
 world.afterEvents.blockExplode.subscribe(({ block }) => {
     if (block.permutation.hasTag(BLOCK_TAG))
         breakOtherHalf(block, block.permutation);
