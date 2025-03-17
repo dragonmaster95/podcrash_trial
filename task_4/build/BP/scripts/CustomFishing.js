@@ -36,12 +36,14 @@ function beforeCasting(data) {
 function afterCasting(data) {
     const entity = data.entity;
     const id = entity.typeId;
-    //in case the player picks up the item entity too fast
+    //in case the player picks up the item entity too fast etc.
     if (!entity.isValid())
         return;
+    //add all bobbers and their (very likely) player to a list.
     if (id === "minecraft:fishing_hook") {
         const sameTick = activeBobbers.filter((player) => player.tick === system.currentTick);
         let closestPlayer = sameTick[0];
+        //get closest fishing hook in case there was more than one in the same tick
         if (sameTick.length > 1) {
             let minDistance = distance3D(sameTick[0].player.location, entity.location);
             for (let i; (i = 1); i < sameTick.length) {
@@ -52,6 +54,7 @@ function afterCasting(data) {
             }
         }
         closestPlayer.addBobber(entity);
+        //mark recently spawned items. Important for afterReeling().
     }
     else if (id === "minecraft:item") {
         entity.addTag("dm95:recent_spawn");
@@ -62,6 +65,7 @@ function removeRecentSpawnTag(entity) {
     if (entity.isValid())
         entity.removeTag("dm95:recent_spawn");
 }
+//mark bobber as pulled (for afterReeling())
 function beforeReeling(data) {
     const bobber = data.removedEntity;
     if (bobber.typeId !== "minecraft:fishing_hook")
@@ -95,8 +99,7 @@ function afterReeling(data) {
         const pulledEntity = pulledEntities[0];
         //get item component
         const itemEntity = pulledEntity.getComponent("minecraft:item");
-        const stack = itemEntity.itemStack;
-        const itemType = stack.typeId;
+        const itemType = itemEntity.itemStack.typeId;
         //if fish and 10% chance
         if (itemType === "minecraft:salmon" || itemType === "minecraft:cod") {
             world.sendMessage("Debug: Salmon/Cod caught");
@@ -122,8 +125,10 @@ function afterReeling(data) {
                 const newItemEntity = dimension.spawnItem(newItem, pulledEntity.location);
                 //appply same velocity
                 newItemEntity.applyImpulse(itemEntity.entity.getVelocity());
-                //giving the player another set of experience
-                //(trying to find the existing orbs and hoping they aren't already despawned and spawning additional orbs and giving them the same value would seem overkill)
+                // Giving the player another set of experience.
+                // Trying to find the existing orbs and hoping they aren't already despawned/picked up 
+                // and spawning additional orbs and giving them the same value would seem overkill), so
+                // I simplified it to this
                 bobber.player.addExperience(randomInt(1, 6));
                 pulledEntity.remove();
             }
@@ -131,7 +136,7 @@ function afterReeling(data) {
                 world.sendMessage(`Debug: Too bad, no custom fish (${customFishChance}/100 are surprisingly low odds)`);
             }
         }
-        //remove bobberPlayer object from list
+        //remove bobberPlayer object from list of bobbers
         activeBobbers.splice(activeBobbers.indexOf(bobber));
     }
 }

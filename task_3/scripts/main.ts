@@ -1,4 +1,4 @@
-import { world, Player, Vector3, Vector2, InputPermissionCategory, system, CameraEaseOptions, EasingType, PlayerLeaveBeforeEvent, PlayerSpawnAfterEvent, TicksPerSecond } from "@minecraft/server";
+import { world, Player, Vector3, Vector2, InputPermissionCategory, system, CameraEaseOptions, EasingType, PlayerSpawnAfterEvent, TicksPerSecond } from "@minecraft/server";
 
 class CutsceneKeyframe {
   public position: Vector3;
@@ -14,9 +14,7 @@ class CutsceneKeyframe {
 
 class Cutscene {
     private keyframes: CutsceneKeyframe[];
-    private duration = 0;
     private players!: Player[];
-    private cutsceneTimer = -1;
     private keyframeTimer = -1;
     private progress = -1;
     private isRunning = false;
@@ -26,14 +24,9 @@ class Cutscene {
     }
 
     public play() {
-
-        world.beforeEvents.playerLeave.subscribe(this.onPlayerLeave.bind(this));
-
         //don't make the cutscene play several instances
         if (this.isRunning) return;
         else this.isRunning = true;
-
-
 
         // Play cutscene for all currently active players (ignores players spawning during the cutscene)
         this.players = world.getPlayers();
@@ -56,9 +49,8 @@ class Cutscene {
         const pos = currentFrame.position
         world.sendMessage(`${pos.x} ${pos.y} ${pos.z}`);
         for (const player of this.players) {
-          // Disable player movement
-          
 			    player.teleport(this.keyframes[0].position);
+          // Disable player movement
           setPlayerMovement(player, false);
           player.camera.setCamera("minecraft:free",{"location":currentFrame.position,"rotation":currentFrame.angle,"easeOptions":currentFrame.easing})
         }
@@ -81,16 +73,6 @@ class Cutscene {
         player.camera.clear();
       }
     }
-
-
-    private wait(milliseconds: number, callback: () => void): void {
-        // Simple wait function using setTimeout
-        setTimeout(callback, milliseconds);
-    }
-
-    private onPlayerLeave(e: PlayerLeaveBeforeEvent): void {
-      const player = e.player;
-    }
 }
 
 function setPlayerMovement(player: Player, bool: boolean): void {
@@ -98,13 +80,15 @@ function setPlayerMovement(player: Player, bool: boolean): void {
   player.inputPermissions.setPermissionCategory(InputPermissionCategory.Movement, bool)
 } 
 
+//Put player at end of cutscene if they left during the cutscene 
+//and teleport them based on their cutscenePos property
 world.afterEvents.playerSpawn.subscribe((e: PlayerSpawnAfterEvent) => {
 	const player = e.player;
 	try {
-    const test = player.getDynamicProperty("cutscenePos") as Vector3;
+    const test = player.getDynamicProperty("cutscenePos");
     if (test == undefined) return;
     else {
-			player.teleport(test, {keepVelocity: false});
+			player.teleport(test as Vector3, {keepVelocity: false});
       player.setDynamicProperty("cutscenPos");
 		}
 	} catch (err) {}

@@ -8,15 +8,12 @@ class CutsceneKeyframe {
 }
 class Cutscene {
     constructor(points) {
-        this.duration = 0;
-        this.cutsceneTimer = -1;
         this.keyframeTimer = -1;
         this.progress = -1;
         this.isRunning = false;
         this.keyframes = points;
     }
     play() {
-        world.beforeEvents.playerLeave.subscribe(this.onPlayerLeave.bind(this));
         //don't make the cutscene play several instances
         if (this.isRunning)
             return;
@@ -43,8 +40,8 @@ class Cutscene {
             const pos = currentFrame.position;
             world.sendMessage(`${pos.x} ${pos.y} ${pos.z}`);
             for (const player of this.players) {
-                // Disable player movement
                 player.teleport(this.keyframes[0].position);
+                // Disable player movement
                 setPlayerMovement(player, false);
                 player.camera.setCamera("minecraft:free", { "location": currentFrame.position, "rotation": currentFrame.angle, "easeOptions": currentFrame.easing });
             }
@@ -66,18 +63,13 @@ class Cutscene {
             player.camera.clear();
         }
     }
-    wait(milliseconds, callback) {
-        // Simple wait function using setTimeout
-        setTimeout(callback, milliseconds);
-    }
-    onPlayerLeave(e) {
-        const player = e.player;
-    }
 }
 function setPlayerMovement(player, bool) {
     player.inputPermissions.setPermissionCategory(InputPermissionCategory.Camera, bool);
     player.inputPermissions.setPermissionCategory(InputPermissionCategory.Movement, bool);
 }
+//Put player at end of cutscene if they left during the cutscene 
+//and teleport them based on their cutscenePos property
 world.afterEvents.playerSpawn.subscribe((e) => {
     const player = e.player;
     try {

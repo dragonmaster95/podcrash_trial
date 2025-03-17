@@ -1,4 +1,4 @@
-import { Block, BlockComponentRandomTickEvent, BlockCustomComponent, world } from "@minecraft/server";
+import { Block, BlockComponentRandomTickEvent, BlockCustomComponent } from "@minecraft/server";
 
 
 export class CropGrowth implements BlockCustomComponent {

@@ -1,2 +1,4 @@
 item.dm95:tomato_fruit=Tomato
 item.dm95:tomato=Tomato Seeds
+warning.dm95:actionbar.insufficient_space.crops=Not enough space to plant this here
+warning.dm95:actionbar.build_limit.crops=Build limit reached
