@@ -1,4 +1,6 @@
-import { world, BlockPermutation, EquipmentSlot, GameMode, EntityComponentTypes, } from "@minecraft/server";
+import { world, BlockPermutation, EquipmentSlot, GameMode, EntityComponentTypes, BlockPistonState, } from "@minecraft/server";
+const BLOCK_TAG = "dm95.two_tall_crop";
+const MAX_GROWTH = 7;
 export class TwoTallCrops {
     constructor() {
         this.onPlace = this.onPlace.bind(this);
@@ -12,15 +14,15 @@ export class TwoTallCrops {
         placeBlock(block);
     }
     onPlayerDestroy({ block, destroyedBlockPermutation, }) {
-        breakBlock(block, destroyedBlockPermutation);
+        breakOtherHalf(block, destroyedBlockPermutation);
     }
     onPlayerInteract({ block, player, }) {
         if (!player)
             return;
-        const test = TwoTallCrops.MAX_GROWTH;
+        const test = MAX_GROWTH;
         let growth = block.permutation.getState("dm95:growth");
         //Check for bone_meal in hand
-        if (growth < TwoTallCrops.MAX_GROWTH) {
+        if (growth < MAX_GROWTH) {
             const equippable = player.getComponent(EntityComponentTypes.Equippable);
             if (!equippable)
                 return;
@@ -43,10 +45,9 @@ export class TwoTallCrops {
     }
 }
 TwoTallCrops.COMPONENT_ID = "dm95:two_tall_crop";
-TwoTallCrops.MAX_GROWTH = 7;
 function growCrop(block, growth, player, mainhand) {
     // Grow crop fully in creative, otherwise give random amount
-    growth = player.getGameMode() === GameMode.creative ? 7 : (growth += randomInt(1, TwoTallCrops.MAX_GROWTH - growth));
+    growth = player.getGameMode() === GameMode.creative ? 7 : (growth += randomInt(1, MAX_GROWTH - growth));
     block.setPermutation(block.permutation.withState("dm95:growth", growth));
     const otherHalf = block.permutation.getState("dm95:top") ? block.below() : block.above();
     if (otherHalf === null || otherHalf === void 0 ? void 0 : otherHalf.matches(block.typeId)) {
@@ -71,6 +72,8 @@ function growCrop(block, growth, player, mainhand) {
     }
 }
 function placeBlock(block) {
+    if (!block.hasTag(BLOCK_TAG))
+        return;
     //getting closest player for warning messages cause onPlace has no player component like beforeOnPlayerPlace had
     const player = block.dimension.getPlayers({ location: block.location, closest: 1 })[0];
     const upBlock = block.above();
@@ -88,9 +91,9 @@ function placeBlock(block) {
     }
     upBlock === null || upBlock === void 0 ? void 0 : upBlock.setPermutation(BlockPermutation.resolve(block.typeId).withState("dm95:top", true));
 }
-function breakBlock(block, destroyedBlockPermutation) {
+function breakOtherHalf(block, perm) {
     //Determine which block to remove
-    let blockToDestroy = destroyedBlockPermutation.getState("dm95:top")
+    let blockToDestroy = perm.getState("dm95:top")
         ? block.below()
         : block.above();
     destroyBlock(blockToDestroy);
@@ -101,25 +104,55 @@ function destroyBlock(block) {
     block.dimension.runCommand(`/setblock ${loc === null || loc === void 0 ? void 0 : loc.x} ${loc === null || loc === void 0 ? void 0 : loc.y} ${loc === null || loc === void 0 ? void 0 : loc.z} air destroy`);
 }
 world.afterEvents.pistonActivate.subscribe(({ piston }) => {
-    // WIP/DEBUG code
-    /*const loc1 = piston.block.location;
+    const state = piston.state;
+    let offset = { x: 0, y: 0, z: 0 };
+    const dir = piston.block.permutation.getState("facing_direction");
+    if (dir == 0)
+        offset.y = -1;
+    if (dir == 1)
+        offset.y = 1;
+    if (dir == 2)
+        offset.z = 1;
+    if (dir == 3)
+        offset.z = -1;
+    if (dir == 4)
+        offset.x = 1;
+    if (dir == 5)
+        offset.x = -1;
+    if (state === BlockPistonState.Retracting)
+        offset = invertVector(offset);
+    const loc1 = piston.block.location;
+    const dim = piston.block.dimension;
+    world.sendMessage(" ");
     world.sendMessage(`Piston: ${loc1.x}, ${loc1.y}, ${loc1.z}`);
-    piston.getAttachedBlocksLocations().forEach((loc) => {
-      world.sendMessage(`${loc.x}, ${loc.y}, ${loc.z}`);
+    piston.getAttachedBlocks().forEach((blockOrigin) => {
+        const loc = addVectors(blockOrigin.location, offset);
+        const blockPushed = dim.getBlock(loc);
+        const upBlock = blockOrigin.above();
+        if (upBlock.hasTag(BLOCK_TAG) && upBlock.permutation.getState("dm95:top") == true) {
+            upBlock === null || upBlock === void 0 ? void 0 : upBlock.setType("minecraft:air");
+            destroyBlock(blockPushed);
+        }
+        const downBlock = blockOrigin.below();
+        if (downBlock.hasTag(BLOCK_TAG) && downBlock.permutation.getState("dm95:top") == false) {
+            destroyBlock(downBlock);
+            blockPushed.setType("minecraft:air");
+        }
+        world.sendMessage(`${blockPushed === null || blockPushed === void 0 ? void 0 : blockPushed.typeId}: ${loc.x}, ${loc.y}, ${loc.z}`);
+        //breakOtherHalf(crop, crop.permutation);
     });
-    piston.getAttachedBlocks().forEach((crop) => {
-      const test = crop.getTags();
-        world.sendMessage(" ");
-        const loc = crop.location;
-        world.sendMessage(`${crop.typeId}: ${loc.x}, ${loc.y}, ${loc.z}`);
-        breakBlock(crop, crop.permutation);
-    });*/
 });
 world.afterEvents.blockExplode.subscribe(({ block }) => {
-    if (block.permutation.hasTag("dm95.two_tall_crop"))
-        breakBlock(block, block.permutation);
+    if (block.permutation.hasTag(BLOCK_TAG))
+        breakOtherHalf(block, block.permutation);
 });
-export function randomInt(min, max) {
+function invertVector(vec) {
+    return { x: -vec.x, y: -vec.y, z: -vec.z };
+}
+function addVectors(vec1, vec2) {
+    return { x: vec1.x + vec2.x, y: vec1.y + vec2.y, z: vec1.z + vec2.z };
+}
+function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 //# sourceMappingURL=TwoTallCrops.js.map
