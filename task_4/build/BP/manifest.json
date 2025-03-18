@@ -2,7 +2,7 @@
 	"format_version": 2,
 	"header": {
 		"name": "Task 4",
-		"description": "Task 4 - Behavior Pack",
+		"description": "Task 4 Behavior Pack - Fishing",
 		"uuid": "6ff2fd17-424f-44c1-b305-d0a38199fcad",
 		"version": [1, 0, 0],
 		"min_engine_version": [1, 16, 0]
@@ -21,7 +21,7 @@
 			"type": "script",
 			"language": "javascript",
 			"uuid": "5e7c40d6-2fd0-4730-9a6e-5d22bdcb4205",
-			"entry": "scripts/main.js",
+			"entry": "scripts/CustomFishing.js",
 			"version": [
 				1,
 				0,
@@ -30,7 +30,6 @@
 		}
 	],
 	"dependencies": [
-        { "module_name": "@minecraft/common", "version": "1.2.0" },
         { "module_name": "@minecraft/server", "version": "1.17.0" }
 	]
 }
